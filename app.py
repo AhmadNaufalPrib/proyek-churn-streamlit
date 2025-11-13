@@ -36,7 +36,8 @@ monthly_charges_rp = st.sidebar.slider(
     max_value=3000000,  # Asumsi max $200
     value=1000000,      # Nilai default
     step=50000          # Kelipatan
-)Contract = st.sidebar.selectbox('Tipe Kontrak', ['Month-to-month', 'One year', 'Two year'])
+)
+Contract = st.sidebar.selectbox('Tipe Kontrak', ['Month-to-month', 'One year', 'Two year'])
 InternetService = st.sidebar.selectbox('Layanan Internet', ['DSL', 'Fiber optic', 'No'])
 PaymentMethod = st.sidebar.selectbox('Metode Pembayaran', ['Electronic check', 'Mailed check', 'Bank transfer (automatic)', 'Credit card (automatic)'])
 
