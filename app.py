@@ -30,8 +30,13 @@ st.sidebar.header('Input Data Pelanggan:')
 
 # --- Input Fitus ---
 tenure = st.sidebar.slider('Lama Berlangganan (Bulan)', 0, 72, 12)
-MonthlyCharges = st.sidebar.slider('Tagihan Bulanan ($)', 0.0, 150.0, 70.0, 0.01)
-Contract = st.sidebar.selectbox('Tipe Kontrak', ['Month-to-month', 'One year', 'Two year'])
+monthly_charges_rp = st.sidebar.slider(
+    'Tagihan Bulanan (Rp)', 
+    min_value=100000, 
+    max_value=3000000,  # Asumsi max $200
+    value=1000000,      # Nilai default
+    step=50000          # Kelipatan
+)Contract = st.sidebar.selectbox('Tipe Kontrak', ['Month-to-month', 'One year', 'Two year'])
 InternetService = st.sidebar.selectbox('Layanan Internet', ['DSL', 'Fiber optic', 'No'])
 PaymentMethod = st.sidebar.selectbox('Metode Pembayaran', ['Electronic check', 'Mailed check', 'Bank transfer (automatic)', 'Credit card (automatic)'])
 
@@ -53,16 +58,29 @@ SeniorCitizen = 0 # Asumsi default
 
 # TotalCharges akan di-handle oleh pipeline (atau diabaikan jika tidak dilatih)
 # Untuk amannya, kita bisa buat estimasi kasar
-TotalCharges = MonthlyCharges * tenure 
+ 
 
 
 # ----------------------------------------------------
 # 3. MEMBUAT TOMBOL PREDIKSI
 # ----------------------------------------------------
 if st.sidebar.button('Prediksi Probabilitas Churn'):
+    
+    # --- TAMBAHKAN LOGIKA KONVERSI INI ---
+    # Tentukan kurs konversi (misal $1 = Rp 15.000)
+    KURS_USD_TO_IDR = 15000.0
+    
+    # Terjemahkan input Rupiah dari slider kembali ke Dolar
+    # Ini adalah nilai yang akan dipahami oleh model
+    monthly_charges_dollar = monthly_charges_rp / KURS_USD_TO_IDR
+    
+    # Hitung TotalCharges menggunakan nilai Dolar (karena model juga dilatih pakai ini)
+    total_charges_dollar = monthly_charges_dollar * tenure
+    # --- SELESAI MENAMBAHKAN ---
+
 
     # 3a. Kumpulkan semua data input ke dalam format DataFrame
-    # Penting! Urutan dan nama kolom harus SAMA PERSIS seperti saat training
+    # Pastikan Anda mengganti nilai 'MonthlyCharges' dan 'TotalCharges'
     data_input = {
         'gender': gender,
         'SeniorCitizen': SeniorCitizen,
@@ -81,10 +99,10 @@ if st.sidebar.button('Prediksi Probabilitas Churn'):
         'Contract': Contract,
         'PaperlessBilling': PaperlessBilling,
         'PaymentMethod': PaymentMethod,
-        'MonthlyCharges': MonthlyCharges,
-        'TotalCharges': TotalCharges
+        'MonthlyCharges': monthly_charges_dollar, # <-- PENTING: Gunakan nilai Dolar
+        'TotalCharges': total_charges_dollar     # <-- PENTING: Gunakan nilai Dolar
     }
-
+    
     # Ubah dictionary menjadi 1 baris DataFrame
     input_df = pd.DataFrame([data_input])
 
